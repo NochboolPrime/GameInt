@@ -39,16 +39,15 @@ io.on('connection', (socket) => {
 });
 
 function guessNumber(socket) {
-    const guess = Math.floor((min + max) / 2);
-    
+    // Генерация случайного числа в пределах текущего диапазона
+    const guess = Math.floor(Math.random() * (max - min + 1)) + min;
+
     // Отправка предположения клиенту
     socket.emit('serverGuess', { guess });
 
     // Проверка на угаданное число
     if (guess === targetNumber) {
         socket.emit('gameResult', { message: `Сервер угадал число ${guess}! Игра окончена.` });
-    } else if (min === max) {
-        socket.emit('gameResult', { message: `Сервер не смог угадать число. Игра окончена.` });
     }
 }
 
