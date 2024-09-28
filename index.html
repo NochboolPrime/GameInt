@@ -30,6 +30,13 @@
             font-weight: bold;
             margin-top: 20px;
         }
+        #endMessage {
+            font-size: 28px; /* Увеличенный размер шрифта */
+            font-weight: bold; /* Жирный текст */
+            color: red; /* Красный цвет текста */
+            margin-top: 20px; /* Отступ сверху */
+            display: none; /* Скрыть по умолчанию */
+        }
     </style>
 </head>
 <body>
@@ -51,6 +58,9 @@
     <div id="currentGuess">Текущее предположение сервера: <span id="guessValue">-</span></div>
 
     <div id="log"></div>
+
+    <!-- Сообщение об окончании игры -->
+    <div id="endMessage"></div>
 
     <!-- Кнопки для подсказок -->
     <div id="hintButtons" style="display:none;">
@@ -76,6 +86,7 @@
             socket.emit('startGame', { min, max, targetNumber });
             document.getElementById('hintButtons').style.display = 'none'; // Скрыть кнопки подсказок
             document.getElementById('guessValue').innerText = '-'; // Сбросить текущее предположение
+            document.getElementById('endMessage').style.display = 'none'; // Скрыть сообщение об окончании игры
         };
 
         socket.on('serverGuess', (data) => {
@@ -88,6 +99,12 @@
         socket.on('gameResult', (data) => {
             const log = document.getElementById('log');
             log.innerHTML += `<p>${data.message}</p>`;
+            
+            // Отображение сообщения об окончании игры
+            const endMessage = document.getElementById('endMessage');
+            endMessage.innerText = data.message; // Установить текст сообщения
+            endMessage.style.display = 'block'; // Показать сообщение
+            
             document.getElementById('hintButtons').style.display = 'none'; // Скрыть кнопки подсказок
         });
 

@@ -6,7 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-let min, max, targetNumber;
+let min, max, targetNumber, currentGuess;
 
 app.use(express.static(__dirname)); // Позволяет обслуживать статические файлы
 
@@ -17,20 +17,22 @@ io.on('connection', (socket) => {
         min = range.min;
         max = range.max;
         targetNumber = range.targetNumber; // Получаем загаданное число от клиента
+        currentGuess = Math.floor(Math.random() * (max - min + 1)) + min; // Первоначальное предположение
 
         guessNumber(socket);
     });
 
     socket.on('hint', (hint) => {
+        // Увеличиваем или уменьшаем текущее предположение
         if (hint === "more") {
-            min++;
+            currentGuess++; // Увеличиваем текущее предположение на 1
         } else if (hint === "less") {
-            max--;
+            currentGuess--; // Уменьшаем текущее предположение на 1
         }
         
         // Проверка на выход за пределы диапазона
-        if (min > max) {
-            socket.emit('gameResult', { message: "Ошибка! Диапазон недопустим." });
+        if (currentGuess < min || currentGuess > max) {
+            socket.emit('gameResult', { message: "Ошибка! Предположение вне диапазона." });
             return;
         }
 
@@ -39,15 +41,12 @@ io.on('connection', (socket) => {
 });
 
 function guessNumber(socket) {
-    // Генерация случайного числа в пределах текущего диапазона
-    const guess = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    // Отправка предположения клиенту
-    socket.emit('serverGuess', { guess });
+    // Отправка текущего предположения клиенту
+    socket.emit('serverGuess', { guess: currentGuess });
 
     // Проверка на угаданное число
-    if (guess === targetNumber) {
-        socket.emit('gameResult', { message: `Сервер угадал число ${guess}! Игра окончена.` });
+    if (currentGuess === targetNumber) {
+        socket.emit('gameResult', { message: `Сервер угадал число ${currentGuess}! Игра окончена.` });
     }
 }
 
