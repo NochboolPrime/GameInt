@@ -6,17 +6,31 @@
     <title>Игра "Угадай число"</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', Courier, monospace; /* Используем моноширинный шрифт */
+            background-color: #282c34; /* Темный фон */
+            color: #00ff00; /* Зеленый цвет текста */
             text-align: center;
             margin: 50px;
         }
         input {
             padding: 10px;
             margin: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3c4043; /* Цвет фона для полей ввода */
+            color: #00ff00; /* Зеленый цвет текста */
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4caf50; /* Зеленый цвет кнопок */
+            color: white; /* Цвет текста на кнопках */
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049; /* Цвет кнопок при наведении */
         }
         #log {
             margin-top: 20px;
@@ -24,6 +38,9 @@
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
+            background-color: #21252b; /* Фон для лога */
+            padding: 10px;
+            border-radius: 5px; /* Закругленные углы */
         }
         #currentGuess {
             font-size: 24px;
@@ -36,6 +53,20 @@
             color: red; /* Красный цвет текста */
             margin-top: 20px; /* Отступ сверху */
             display: none; /* Скрыть по умолчанию */
+        }
+
+        .fade-in {
+            animation-name: fadeIn;
+            animation-duration: 0.5s; /* Длительность анимации */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .typing {
+            display: inline-block;
         }
     </style>
 </head>
@@ -91,31 +122,42 @@
 
         socket.on('serverGuess', (data) => {
             const log = document.getElementById('log');
-            log.innerHTML += `<p>Сервер предполагает: ${data.guess}</p>`;
-            document.getElementById('guessValue').innerText = data.guess; // Обновить текущее предположение
-            document.getElementById('hintButtons').style.display = 'block'; // Показать кнопки подсказок
-        });
-
-        socket.on('gameResult', (data) => {
-            const log = document.getElementById('log');
-            log.innerHTML += `<p>${data.message}</p>`;
             
-            // Отображение сообщения об окончании игры
-            const endMessage = document.getElementById('endMessage');
-            endMessage.innerText = data.message; // Установить текст сообщения
-            endMessage.style.display = 'block'; // Показать сообщение
+            // Создаем новый элемент для логирования
+            const guessLog = document.createElement('p');
             
-            document.getElementById('hintButtons').style.display = 'none'; // Скрыть кнопки подсказок
-        });
+            // Добавляем класс для анимации
+            guessLog.classList.add('fade-in');
 
-        // Обработка нажатия кнопок подсказок
-        document.getElementById('more').onclick = function() {
-            socket.emit('hint', 'more');
-        };
+            // Печатаем предположение с эффектом
+            guessLog.innerHTML = `<span class='typing'>Сервер предполагает:</span> ${data.guess}`;
+            
+           log.appendChild(guessLog); // Добавляем новое сообщение в лог
+           
+           document.getElementById('guessValue').innerText = data.guess; // Обновить текущее предположение
+           document.getElementById('hintButtons').style.display = 'block'; // Показать кнопки подсказок
+       });
 
-        document.getElementById('less').onclick = function() {
-            socket.emit('hint', 'less');
-        };
-    </script>
+       socket.on('gameResult', (data) => {
+           const log = document.getElementById('log');
+           log.innerHTML += `<p>${data.message}</p>`;
+           
+           // Отображение сообщения об окончании игры
+           const endMessage = document.getElementById('endMessage');
+           endMessage.innerText = data.message; // Установить текст сообщения
+           endMessage.style.display = 'block'; // Показать сообщение
+           
+           document.getElementById('hintButtons').style.display = 'none'; // Скрыть кнопки подсказок
+       });
+
+       // Обработка нажатия кнопок подсказок
+       document.getElementById('more').onclick = function() {
+           socket.emit('hint', 'more');
+       };
+
+       document.getElementById('less').onclick = function() {
+           socket.emit('hint', 'less');
+       };
+   </script>
 </body>
 </html>
