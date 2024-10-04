@@ -6,9 +6,9 @@
     <title>Игра "Угадай число"</title>
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace; /* Используем моноширинный шрифт */
-            background-color: #282c34; /* Темный фон */
-            color: #00ff00; /* Зеленый цвет текста */
+            font-family: 'Courier New', Courier, monospace; 
+            background-color: #282c34; 
+            color: #00ff00; 
             text-align: center;
             margin: 50px;
         }
@@ -17,20 +17,20 @@
             margin: 10px;
             border: none;
             border-radius: 5px;
-            background-color: #3c4043; /* Цвет фона для полей ввода */
-            color: #00ff00; /* Зеленый цвет текста */
+            background-color: #3c4043; 
+            color: #00ff00; 
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
             border: none;
             border-radius: 5px;
-            background-color: #4caf50; /* Зеленый цвет кнопок */
-            color: white; /* Цвет текста на кнопках */
+            background-color: #4caf50; 
+            color: white; 
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049; /* Цвет кнопок при наведении */
+            background-color: #45a049; 
         }
         #log {
             margin-top: 20px;
@@ -38,9 +38,9 @@
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
-            background-color: #21252b; /* Фон для лога */
+            background-color: #21252b; 
             padding: 10px;
-            border-radius: 5px; /* Закругленные углы */
+            border-radius: 5px; 
         }
         #currentGuess {
             font-size: 24px;
@@ -48,16 +48,16 @@
             margin-top: 20px;
         }
         #endMessage {
-            font-size: 28px; /* Увеличенный размер шрифта */
-            font-weight: bold; /* Жирный текст */
-            color: red; /* Красный цвет текста */
-            margin-top: 20px; /* Отступ сверху */
-            display: none; /* Скрыть по умолчанию */
+            font-size: 28px;
+            font-weight: bold; 
+            color: red; 
+            margin-top: 20px; 
+            display: none; 
         }
 
         .fade-in {
             animation-name: fadeIn;
-            animation-duration: 0.5s; /* Длительность анимации */
+            animation-duration: 0.5s; 
         }
 
         @keyframes fadeIn {
@@ -79,7 +79,7 @@
     <input type="number" id="max" value="100">
     <br>
     
-    <!-- Поле ввода для числа, которое сервер должен угадать -->
+    
     <label for="targetNumber">Загаданное число:</label>
     <input type="number" id="targetNumber" value="">
     
@@ -90,10 +90,10 @@
 
     <div id="log"></div>
 
-    <!-- Сообщение об окончании игры -->
+    
     <div id="endMessage"></div>
 
-    <!-- Кнопки для подсказок -->
+
     <div id="hintButtons" style="display:none;">
         <button id="more">Больше</button>
         <button id="less">Меньше</button>
@@ -108,49 +108,48 @@
             const max = parseInt(document.getElementById('max').value);
             const targetNumber = parseInt(document.getElementById('targetNumber').value);
 
-            // Проверка на корректность введенного числа
+          
             if (isNaN(targetNumber) || targetNumber < min || targetNumber > max) {
                 alert("Пожалуйста, введите корректное загаданное число в пределах заданного диапазона.");
                 return;
             }
 
             socket.emit('startGame', { min, max, targetNumber });
-            document.getElementById('hintButtons').style.display = 'none'; // Скрыть кнопки подсказок
-            document.getElementById('guessValue').innerText = '-'; // Сбросить текущее предположение
-            document.getElementById('endMessage').style.display = 'none'; // Скрыть сообщение об окончании игры
+            document.getElementById('hintButtons').style.display = 'none'; 
+            document.getElementById('guessValue').innerText = '-'; 
+            document.getElementById('endMessage').style.display = 'none'; 
         };
 
         socket.on('serverGuess', (data) => {
             const log = document.getElementById('log');
             
-            // Создаем новый элемент для логирования
+      
             const guessLog = document.createElement('p');
             
-            // Добавляем класс для анимации
+        
             guessLog.classList.add('fade-in');
 
-            // Печатаем предположение с эффектом
+            
             guessLog.innerHTML = `<span class='typing'>Сервер предполагает:</span> ${data.guess}`;
             
-           log.appendChild(guessLog); // Добавляем новое сообщение в лог
+           log.appendChild(guessLog); 
            
-           document.getElementById('guessValue').innerText = data.guess; // Обновить текущее предположение
-           document.getElementById('hintButtons').style.display = 'block'; // Показать кнопки подсказок
+           document.getElementById('guessValue').innerText = data.guess; 
+           document.getElementById('hintButtons').style.display = 'block'; 
        });
 
        socket.on('gameResult', (data) => {
            const log = document.getElementById('log');
            log.innerHTML += `<p>${data.message}</p>`;
            
-           // Отображение сообщения об окончании игры
+          
            const endMessage = document.getElementById('endMessage');
-           endMessage.innerText = data.message; // Установить текст сообщения
-           endMessage.style.display = 'block'; // Показать сообщение
+           endMessage.innerText = data.message; 
+           endMessage.style.display = 'block'; 
            
-           document.getElementById('hintButtons').style.display = 'none'; // Скрыть кнопки подсказок
+           document.getElementById('hintButtons').style.display = 'none'; 
        });
 
-       // Обработка нажатия кнопок подсказок
        document.getElementById('more').onclick = function() {
            socket.emit('hint', 'more');
        };

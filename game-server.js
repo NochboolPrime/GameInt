@@ -8,7 +8,7 @@ const io = socketIo(server);
 
 let min, max, targetNumber, currentGuess;
 
-app.use(express.static(__dirname)); // Позволяет обслуживать статические файлы
+app.use(express.static(__dirname)); 
 
 io.on('connection', (socket) => {
     console.log("Клиент подключен...");
@@ -16,8 +16,8 @@ io.on('connection', (socket) => {
     socket.on('startGame', (range) => {
         min = range.min;
         max = range.max;
-        targetNumber = range.targetNumber; // Получаем загаданное число от клиента
-        currentGuess = Math.floor(Math.random() * (max - min + 1)) + min; // Первоначальное предположение
+        targetNumber = range.targetNumber; 
+        currentGuess = Math.floor(Math.random() * (max - min + 1)) + min; 
 
         console.log(`Начата игра с диапазоном: от ${min} до ${max} и загаданным числом: ${targetNumber}`);
         
@@ -27,14 +27,14 @@ io.on('connection', (socket) => {
     socket.on('hint', (hint) => {
         console.log(`Получена подсказка от клиента: ${hint}`);
         
-        // Увеличиваем или уменьшаем текущее предположение
+        
         if (hint === "more") {
-            currentGuess++; // Увеличиваем текущее предположение на 1
+            currentGuess++; 
         } else if (hint === "less") {
-            currentGuess--; // Уменьшаем текущее предположение на 1
+            currentGuess--; 
         }
         
-        // Проверка на выход за пределы диапазона
+       
         if (currentGuess < min || currentGuess > max) {
             socket.emit('gameResult', { message: "Ошибка! Предположение вне диапазона." });
             return;
@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
 });
 
 function guessNumber(socket) {
-    // Отправка текущего предположения клиенту
+  
     socket.emit('serverGuess', { guess: currentGuess });
 
     console.log(`Сервер предполагает число: ${currentGuess}`);
