@@ -50,7 +50,7 @@ function guessNumber(socket) {
 
     console.log(`Сервер предполагает число: ${currentGuess}`);
 
-    // Проверка на угаданное число
+   
     if (currentGuess === targetNumber) {
         socket.emit('gameResult', { message: `Сервер угадал число ${currentGuess}! Игра окончена.` });
         console.log(`Игра окончена. Сервер угадал число: ${currentGuess}`);
