@@ -19,10 +19,14 @@ io.on('connection', (socket) => {
         targetNumber = range.targetNumber; // Получаем загаданное число от клиента
         currentGuess = Math.floor(Math.random() * (max - min + 1)) + min; // Первоначальное предположение
 
+        console.log(`Начата игра с диапазоном: от ${min} до ${max} и загаданным числом: ${targetNumber}`);
+        
         guessNumber(socket);
     });
 
     socket.on('hint', (hint) => {
+        console.log(`Получена подсказка от клиента: ${hint}`);
+        
         // Увеличиваем или уменьшаем текущее предположение
         if (hint === "more") {
             currentGuess++; // Увеличиваем текущее предположение на 1
@@ -44,9 +48,12 @@ function guessNumber(socket) {
     // Отправка текущего предположения клиенту
     socket.emit('serverGuess', { guess: currentGuess });
 
+    console.log(`Сервер предполагает число: ${currentGuess}`);
+
     // Проверка на угаданное число
     if (currentGuess === targetNumber) {
         socket.emit('gameResult', { message: `Сервер угадал число ${currentGuess}! Игра окончена.` });
+        console.log(`Игра окончена. Сервер угадал число: ${currentGuess}`);
     }
 }
 
