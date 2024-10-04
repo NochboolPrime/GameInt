@@ -1,33 +1,63 @@
-// game-client.js
-const net = require('net');
-const argv = require('yargs').argv;
+const io = require('socket.io-client');
+const readline = require('readline');
 
-const min = parseInt(argv._[0]);
-const max = parseInt(argv._[1]);
-const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-
-const client = new net.Socket();
-
-client.connect(3000, '127.0.0.1', () => {
-    console.log(`Клиент готов. Загаданное число между ${min} и ${max}.`);
-    // Отправка диапазона на сервер
-    client.write(JSON.stringify({ range: `${min}-${max}` }));
+// Создаем интерфейс для чтения ввода из терминала
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
 });
 
-client.on('data', (data) => {
-    const response = JSON.parse(data.toString());
-    console.log(`Получено от сервера: ${JSON.stringify(response)}`);
+// Устанавливаем соединение с сервером
+const socket = io.connect('http://127.0.0.1:3000');
 
-    if (response.answer < randomNumber) {
-        client.write(JSON.stringify({ hint: "more" }));
-    } else if (response.answer > randomNumber) {
-        client.write(JSON.stringify({ hint: "less" }));
+let min, max, targetNumber;
+
+// Функция для начала игры
+function startGame() {
+    if (min !== undefined && max !== undefined && targetNumber !== undefined) {
+        socket.emit('startGame', { min, max, targetNumber });
     } else {
-        console.log("Поздравляем! Загаданное число угадано!");
-        client.destroy(); // Закрытие соединения
+        console.log("Пожалуйста, задайте диапазон и загаданное число.");
+    }
+}
+
+// Обработка входящих данных от сервера
+socket.on('serverGuess', (data) => {
+    console.log(`Сервер предполагает: ${data.guess}`);
+});
+
+socket.on('gameResult', (data) => {
+    console.log(data.message);
+});
+
+// Обработка ввода пользователя для настройки игры
+rl.on('line', (input) => {
+    const args = input.split(' ');
+
+    if (args[0] === 'int') {
+        // Устанавливаем загаданное число
+        targetNumber = parseInt(args[1]);
+        console.log(`Загаданное число установлено: ${targetNumber}`);
+        startGame();
+    } else if (args.length === 2) {
+        // Устанавливаем диапазон
+        min = parseInt(args[0]);
+        max = parseInt(args[1]);
+        console.log(`Диапазон установлен: от ${min} до ${max}`);
+        startGame();
+    } else {
+        console.log("Неверная команда. Используйте 'int <число>' или '<min> <max>' для задания диапазона.");
     }
 });
 
-client.on('close', () => {
+// Запрос подсказки у пользователя
+rl.on('line', (input) => {
+    if (input === 'more' || input === 'less') {
+        socket.emit('hint', input);
+    }
+});
+
+// Обработка события закрытия соединения
+socket.on('disconnect', () => {
     console.log('Соединение закрыто');
 });
